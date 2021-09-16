@@ -1,0 +1,19 @@
+package com.devsuperior.dscatalog.services;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+
+import com.devsuperior.dscatalog.DTO.ProductDTO;
+import com.devsuperior.dscatalog.entities.Product;
+import com.devsuperior.dscatalog.repositories.ProductRepository;
+
+@Service
+public class ProductService {
+	ProductRepository repository;
+	
+	public Page<ProductDTO> findAll(PageRequest pageRequest){
+		Page<Product> page = repository.findAll(pageRequest);
+		return page.map(x -> new ProductDTO(x));
+	}
+}
