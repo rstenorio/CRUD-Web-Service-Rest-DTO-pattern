@@ -5,10 +5,9 @@ import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,7 +17,6 @@ import com.devsuperior.dscatalog.entities.Category;
 import com.devsuperior.dscatalog.entities.Product;
 import com.devsuperior.dscatalog.repositories.CategoryRepository;
 import com.devsuperior.dscatalog.repositories.ProductRepository;
-import com.devsuperior.dscatalog.services.exceptions.DBException;
 import com.devsuperior.dscatalog.services.exceptions.ResourceNotFoundException;
 
 @Service
@@ -30,8 +28,8 @@ public class ProductService {
 	private CategoryRepository Catrepository;
 
 	@Transactional(readOnly = true)
-	public Page<ProductDTO> findAllPaged(PageRequest pageRequest) {
-		Page<Product> page = repository.findAll(pageRequest);
+	public Page<ProductDTO> findAllPaged(Pageable pageable) {
+		Page<Product> page = repository.findAll(pageable);
 		return page.map(x -> new ProductDTO(x));
 	}
 
@@ -69,26 +67,23 @@ public class ProductService {
 		entity.setPrice(dto.getPrice());
 		entity.setImgUrl(dto.getImgUrl());
 		entity.setDate(dto.getDate());
-		
+
 		entity.getCategories().clear();
-		
-		for(CategoryDTO catDTO : dto.getCategories() ) {
+
+		for (CategoryDTO catDTO : dto.getCategories()) {
 			Category cat = Catrepository.getOne(catDTO.getId());
 			entity.getCategories().add(cat);
 		}
 
 	}
-	
-	//caso coloque transactional nao sera possivel capturar exception
+
+	// caso coloque transactional nao sera possivel capturar exception
 	public void delete(Long id) {
 		try {
-			repository.deleteById(id);		
-		}catch (EmptyResultDataAccessException e) {
-			throw new ResourceNotFoundException("Id non trovato: " + id); 
-		}catch (DataIntegrityViolationException  e) {
-			throw new DBException("Integrity Violation");
+			repository.deleteById(id);
+		} catch (EmptyResultDataAccessException e) {
+			throw new ResourceNotFoundException("Id non trovato: " + id);
 		}
-		
 	}
 
 }
